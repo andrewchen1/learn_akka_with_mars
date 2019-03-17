@@ -1,12 +1,11 @@
-package top.andrewchen1.chapter1.homework;
-
+package top.andrewchen1.chapter1;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.testkit.TestActorRef;
 import org.junit.Assert;
 import org.junit.Test;
-import top.andrew1.chapter1.homework.Chapter1Homework;
+import top.andrewchen1.chapter1.homework.Chapter1Homework;
 
 /**
  * @author dafuchen

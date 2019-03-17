@@ -1,5 +1,4 @@
-package top.andrew1.chapter1;
-
+package top.andrewchen1.chapter1;
 import akka.actor.AbstractActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;

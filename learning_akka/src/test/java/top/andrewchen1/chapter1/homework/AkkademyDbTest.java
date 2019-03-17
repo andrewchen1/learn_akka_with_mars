@@ -1,12 +1,11 @@
-package top.andrewchen1.chapter1;
-
+package top.andrewchen1.chapter1.homework;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.testkit.TestActorRef;
 import org.junit.Test;
-import top.andrew1.chapter1.AkkademyDb;
-import top.andrew1.chapter1.SetRequest;
+import top.andrewchen1.chapter1.AkkademyDb;
+import top.andrewchen1.chapter2.db.SetRequest;
 
 import static org.junit.Assert.assertEquals;
 
