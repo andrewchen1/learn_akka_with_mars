@@ -8,7 +8,7 @@ import java.util.Map;
  * @author dafuchen
  * 2019-03-30
  */
-public class LimitBid implements Limit{
+public class LimitBid extends Limit{
     private long id;
     private BigDecimal price;
     private long quantity;
@@ -93,7 +93,6 @@ public class LimitBid implements Limit{
         this.symbol = symbol;
     }
 
-    @Override
     public Map<String, Object> getContent() {
         var content = new HashMap<String, Object>();
         content.put("quantity", quantity);

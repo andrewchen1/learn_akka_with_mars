@@ -22,7 +22,7 @@ public class PostgresqlConnection {
     private PostgresqlConnection() {
         try {
             properties = new Properties();
-            properties.load(this.getClass().getClassLoader().getResourceAsStream("dev/jdbc.properties"));
+            properties.load(this.getClass().getClassLoader().getResourceAsStream("jdbc.properties"));
         } catch(Exception e) {
             log.log(Level.INFO, e.getMessage());
         }

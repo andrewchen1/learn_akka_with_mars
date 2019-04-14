@@ -20,8 +20,7 @@ public class SequenceRepository {
     public static Boolean createSequence (String sequenceName) throws SQLException {
         Connection connection = PostgresqlConnection.getNewInstance().getConnection();
         Statement statement = connection.createStatement();
-        statement.execute("create sequence  " + sequenceName);
-        return true;
+        return statement.execute("create sequence  " + sequenceName);
     }
 
     public static List<String> listSequence() throws Exception {
@@ -36,13 +35,13 @@ public class SequenceRepository {
         return sequenceList;
     }
 
-    public static Integer getNextValue(String sequenceName) throws SQLException {
+    public static Long getNextValue(String sequenceName) throws SQLException {
         Connection connection = PostgresqlConnection.getNewInstance().getConnection();
         PreparedStatement preparedStatement = connection.prepareStatement("select nextval(?)");
-        preparedStatement.setString(1, sequenceName);
+        preparedStatement.setString(1, sequenceName.trim());
         ResultSet resultSet = preparedStatement.executeQuery();
         resultSet.next();
-        return resultSet.getInt(1);
+        return resultSet.getLong(1);
     }
 
     public static Boolean dropSequence(String sequenceName) throws Exception{

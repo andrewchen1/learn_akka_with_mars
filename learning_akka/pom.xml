@@ -13,19 +13,10 @@
     <dependencies>
         <dependency>
             <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-remote_2.12</artifactId>
-            <version>${akka.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-cluster_2.12</artifactId>
             <version>${akka.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.github.romix.akka</groupId>
-            <artifactId>akka-kryo-serialization_2.12</artifactId>
-            <version>0.5.2</version>
-        </dependency>
+
     </dependencies>
 
 </project>

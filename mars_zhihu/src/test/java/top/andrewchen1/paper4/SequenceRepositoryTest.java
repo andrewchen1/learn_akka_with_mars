@@ -11,7 +11,7 @@ import top.andrewchen1.paper4.repository.SequenceRepository;
 public class SequenceRepositoryTest {
     @Test
     public void createSequenceTest() throws Exception {
-        Boolean result = SequenceRepository.createSequence("sequences");
+        Boolean result = SequenceRepository.createSequence("order_id");
     }
 
     @Test
@@ -21,11 +21,11 @@ public class SequenceRepositoryTest {
 
     @Test
     public void nextValue()throws Exception {
-        Assert.assertEquals(Integer.valueOf(1), SequenceRepository.getNextValue("sequences"));
+        Assert.assertEquals(Long.valueOf(1), SequenceRepository.getNextValue("order_id"));
     }
 
     @Test
     public void dropSequence() throws Exception {
-        SequenceRepository.dropSequence("sequences");
+        SequenceRepository.dropSequence("orderid");
     }
 }

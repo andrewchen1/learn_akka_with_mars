@@ -3,6 +3,8 @@ package top.andrewchen1.paper9.actor;
 import akka.actor.AbstractActor;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
+import akka.event.Logging;
+import akka.event.LoggingAdapter;
 import akka.japi.pf.ReceiveBuilder;
 import akka.util.Timeout;
 import scala.concurrent.Await;
@@ -19,6 +21,7 @@ import static akka.pattern.Patterns.ask;
  * 2019-03-30
  */
 public class OrderAction extends AbstractActor {
+    private final LoggingAdapter log = Logging.getLogger(context().system(), this);
     private String url;
     private ActorSelection actorSelection;
 
@@ -34,44 +37,67 @@ public class OrderAction extends AbstractActor {
     public Receive createReceive() {
         return ReceiveBuilder.create()
                 .match(LimitAsk.class, msg -> {
-                    Long sequence = getSequence();
-                    msg.setId(sequence);
-                    OrderRepository.placeOrder(msg);
-                    sender().tell(sequence, self());
+                    log.info("limitAsk the message is {}", msg);
+                    try {
+                        sender().tell(save(msg), self());
+                    } catch (Exception e) {
+                        log.error("limitAsk the error {}" , e);
+                    }
                 })
                 .match(LimitBid.class, msg -> {
-                    Long sequence = getSequence();
-                    msg.setId(sequence);
-                    OrderRepository.placeOrder(msg);
-                    sender().tell(sequence, self());
+                    log.info("limitBid the message is {}", msg);
+                    try {
+                        sender().tell(save(msg), self());
+                    } catch (Exception e) {
+                        log.error("limitBid the error is {}", e);
+                    }
                 })
                 .match(MarketAsk.class, msg -> {
-                    Long sequence = getSequence();
-                    msg.setId(sequence);
-                    OrderRepository.placeOrder(msg);
-                    sender().tell(sequence, self());
+                    log.info("MarketAsk the message is {}", msg);
+                    try {
+                        sender().tell(save(msg), self());
+                    } catch (Exception e) {
+                        log.error("MarketAsk the error is {}", e);
+                    }
                 })
                 .match(MarketBid.class, msg -> {
-                    Long sequence = getSequence();
-                    msg.setId(sequence);
-                    OrderRepository.placeOrder(msg);
-                    sender().tell(sequence, self());
+                    log.info("MarketBid the message is {}", msg);
+                    try {
+                        sender().tell(save(msg), self());
+                    } catch (Exception e) {
+                        log.error("MarketBid the error is {}", e);
+                    }
                 })
                 .match(MarketCancel.class, msg -> {
-                    Long sequence = getSequence();
-                    msg.setId(sequence);
-                    OrderRepository.placeOrder(msg);
-                    sender().tell(sequence, self());
+                    log.info("MarketCancel the message is {}", msg);
+                    try {
+                        sender().tell(save(msg), self());
+                    } catch (Exception e) {
+                        log.error("MarketCancel the error is {}", e);
+                    }
+                })
+                .match(Cancel.class, msg -> {
+                    log.info("Cancel the message is {}", msg);
+                    try {
+                        sender().tell(save(msg), self());
+                    } catch (Exception e) {
+                        log.error("Cancel the error is {}", e);
+                    }
+                }).matchAny(msg -> {
+                    log.error("send unknown message {}", msg);
                 })
                 .build();
     }
 
-    private Long getSequence() throws Exception {
+    private Long save(TradeOrder order) throws Exception {
         NextValue nextValue = new NextValue();
         nextValue.setName("order_id");
         Timeout timeout = Timeout.create(Duration.ofSeconds(1));
         var future = ask(actorSelection, nextValue, timeout);
-        return (Long)Await.result(future, timeout.duration());
+        Long sequence = (Long)Await.result(future, timeout.duration());
+        order.setId(sequence);
+        OrderRepository.save(order);
+        return sequence;
     }
 
     @Override

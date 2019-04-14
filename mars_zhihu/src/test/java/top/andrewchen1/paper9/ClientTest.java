@@ -1,25 +1,23 @@
 package top.andrewchen1.paper9;
 
-import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.testkit.javadsl.TestKit;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import top.andrewchen1.paper4.actor.SequencesActor;
-import top.andrewchen1.paper4.dto.CreateSequence;
-import top.andrewchen1.paper4.dto.DropSequence;
 import top.andrewchen1.paper4.dto.NextValue;
+import top.andrewchen1.paper9.actor.OrderAction;
+import top.andrewchen1.paper9.order.*;
 
-import java.time.Duration;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
+import java.math.BigDecimal;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static akka.pattern.Patterns.ask;
-import static scala.compat.java8.FutureConverters.toJava;
 
 
 /**
@@ -27,55 +25,107 @@ import static scala.compat.java8.FutureConverters.toJava;
  * 2019-03-26
  */
 public class ClientTest {
-    private static ActorSystem actorSystem;
-    private static ActorRef server;
+    private static ActorSystem system;
+    private static Random random;
+    private static String ORDER_PATH = "akka.tcp://test@127.0.0.1:2552/user/order";
+
+    static {
+        random = new Random();
+    }
 
     @BeforeClass
-    public void setup() throws Exception {
-        actorSystem = ActorSystem.create("test");
-        server = actorSystem.actorOf(SequencesActor.props(), "sequences");
-        var message = new CreateSequence();
-        message.setName("test");
-        CompletionStage stage = toJava(ask(server, message, 1000));
-        CompletableFuture<Boolean> future = (CompletableFuture<Boolean>)stage;
-        Assert.assertTrue(future.get());
+    public static void setup() throws Exception {
+        Config config = ConfigFactory.load("application-9");
+        String sequencePath = config.getString("sequence.address");
+        system = ActorSystem.create("test", config);
+        system.actorOf(OrderAction.props(sequencePath), "order");
     }
 
     @AfterClass
-    public void teardown() throws Exception {
-        var message = new DropSequence();
-        message.setName("test");
-        CompletionStage stage = toJava(ask(server, message, 1000));
-        CompletableFuture<Boolean> future = (CompletableFuture<Boolean>)stage;
-        Assert.assertTrue(future.get());
+    public static void teardown() throws Exception {
+        TestKit.shutdownActorSystem(system);
     }
 
     @Test
-    public void testNextValue() {
-        new TestKit(actorSystem) {{
-            var lastId = new AtomicLong();
-            ActorSelection actorSelection = actorSystem.actorSelection("akka://test/user/test/sequences");
-            var message = new NextValue();
-            message.setName("test");
-            server.tell(message, getRef());
+    public void testBasicFlow() {
+        new TestKit(system) {{
+            ActorSelection remote = system.actorSelection(ORDER_PATH);
+            AtomicLong lastId = new AtomicLong();
+            remote.tell(randOrder(), getRef());
             awaitCond(this::msgAvailable);
-            expectMsgPF("init test data", msg -> {
+            expectMsgPF("check first id and save it", msg -> {
+                Assert.assertTrue(msg instanceof Long);
                 lastId.set((Long) msg);
                 return msg;
             });
 
-            within(Duration.ofSeconds(5), () -> {
-                for (int i = 0; i < 10; i++) {
-                    server.tell(message, getRef());
-                    awaitCond(this::msgAvailable);
-                    expectMsgPF("expect get next and next values", msg -> {
-                        Assert.assertEquals(lastId.get()+1, msg);
-                        lastId.set((Long)msg);
-                        return msg;
-                    });
-                }
-                return null;
-            });
+            for (int i = 0; i < 100; i++) {
+                remote.tell(randOrder(), getRef());
+                awaitCond(this::msgAvailable);
+                expectMsgPF(String.format("checkout id %d times", i), msg -> {
+                    Assert.assertEquals(lastId.incrementAndGet(), msg);
+                    return msg;
+                });
+            }
         }};
+    }
+
+    private Order randOrder() {
+        int decide = random.nextInt(5);
+        switch (decide) {
+            case 0:
+                return randLimitAsk();
+            case 1:
+                return randLimitBid();
+            case 2:
+                return randMarketAsk();
+            case 3:
+                return randMarketBid();
+            case 4:
+                return randCancel();
+            default:
+                return null;
+        }
+    }
+
+    private LimitAsk randLimitAsk() {
+        LimitAsk result = new LimitAsk();
+        result.setSymbol("btcusdt");
+        result.setAccountId(random.nextLong());
+        result.setPrice(BigDecimal.valueOf(random.nextDouble()));
+        result.setQuantity(random.nextLong());
+        return result;
+    }
+
+    private LimitBid randLimitBid() {
+        LimitBid result = new LimitBid();
+        result.setSymbol("btcusdt");
+        result.setAccountId(random.nextLong());
+        result.setPrice(BigDecimal.valueOf(random.nextDouble()));
+        result.setQuantity(random.nextLong());
+        return result;
+    }
+
+    private MarketAsk randMarketAsk() {
+        MarketAsk result = new MarketAsk();
+        result.setSymbol("btcusdt");
+        result.setAccountId(random.nextLong());
+        result.setQuantity(random.nextLong());
+        return result;
+    }
+
+    private MarketBid randMarketBid() {
+        MarketBid result = new MarketBid();
+        result.setSymbol("btcusdt");
+        result.setAccountId(random.nextLong());
+        result.setQuantity(random.nextLong());
+        return result;
+    }
+
+    private Cancel randCancel(){
+        Cancel result = new Cancel();
+        result.setSymbol("btcusdt");
+        result.setAccountId(random.nextLong());
+        return result;
     }
 }
