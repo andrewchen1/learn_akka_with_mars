@@ -17,14 +17,16 @@ public class SequenceRepository {
      * @return
      * @throws SQLException
      */
-    public static Boolean createSequence (String sequenceName) throws SQLException {
-        Connection connection = PostgresqlConnection.getNewInstance().getConnection();
+    public static Boolean createSequence (String sequenceName) throws Exception {
+        Connection connection = PostgresqlConnection.getInstance().getConnection();
         Statement statement = connection.createStatement();
-        return statement.execute("create sequence  " + sequenceName);
+        boolean result = statement.execute("create sequence  " + sequenceName);
+        connection.close();
+        return result;
     }
 
     public static List<String> listSequence() throws Exception {
-        Connection connection = PostgresqlConnection.getNewInstance().getConnection();
+        Connection connection = PostgresqlConnection.getInstance().getConnection();
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery("select sequencename, COALESCE(last_value, start_value) as last_value from pg_sequences");
         List<String> sequenceList = new ArrayList<>();
@@ -32,22 +34,27 @@ public class SequenceRepository {
             String sequenceName = resultSet.getString(1);
             sequenceList.add(sequenceName);
         }
-        return sequenceList;
+        List<String> result = sequenceList;
+        connection.close();
+        return result;
     }
 
-    public static Long getNextValue(String sequenceName) throws SQLException {
-        Connection connection = PostgresqlConnection.getNewInstance().getConnection();
+    public static Long getNextValue(String sequenceName) throws Exception {
+        Connection connection = PostgresqlConnection.getInstance().getConnection();
         PreparedStatement preparedStatement = connection.prepareStatement("select nextval(?)");
         preparedStatement.setString(1, sequenceName.trim());
         ResultSet resultSet = preparedStatement.executeQuery();
         resultSet.next();
-        return resultSet.getLong(1);
+        Long result = resultSet.getLong(1);
+        connection.close();
+        return result;
     }
 
     public static Boolean dropSequence(String sequenceName) throws Exception{
-        Connection connection = PostgresqlConnection.getNewInstance().getConnection();
+        Connection connection = PostgresqlConnection.getInstance().getConnection();
         Statement statement = connection.createStatement();
-        statement.execute("drop sequence " + sequenceName);
-        return true;
+        boolean result = statement.execute("drop sequence " + sequenceName);
+        connection.close();
+        return result;
     }
 }

@@ -37,49 +37,49 @@ public class OrderAction extends AbstractActor {
     public Receive createReceive() {
         return ReceiveBuilder.create()
                 .match(LimitAsk.class, msg -> {
-                    log.info("limitAsk the message is {}", msg);
                     try {
                         sender().tell(save(msg), self());
+                        log.info("limitAsk the message is {}", msg);
                     } catch (Exception e) {
                         log.error("limitAsk the error {}" , e);
                     }
                 })
                 .match(LimitBid.class, msg -> {
-                    log.info("limitBid the message is {}", msg);
                     try {
                         sender().tell(save(msg), self());
+                        log.info("limitBid the message is {}", msg);
                     } catch (Exception e) {
                         log.error("limitBid the error is {}", e);
                     }
                 })
                 .match(MarketAsk.class, msg -> {
-                    log.info("MarketAsk the message is {}", msg);
                     try {
                         sender().tell(save(msg), self());
+                        log.info("MarketAsk the message is {}", msg);
                     } catch (Exception e) {
                         log.error("MarketAsk the error is {}", e);
                     }
                 })
                 .match(MarketBid.class, msg -> {
-                    log.info("MarketBid the message is {}", msg);
                     try {
                         sender().tell(save(msg), self());
+                        log.info("MarketBid the message is {}", msg);
                     } catch (Exception e) {
                         log.error("MarketBid the error is {}", e);
                     }
                 })
                 .match(MarketCancel.class, msg -> {
-                    log.info("MarketCancel the message is {}", msg);
                     try {
                         sender().tell(save(msg), self());
+                        log.info("MarketCancel the message is {}", msg);
                     } catch (Exception e) {
                         log.error("MarketCancel the error is {}", e);
                     }
                 })
                 .match(Cancel.class, msg -> {
-                    log.info("Cancel the message is {}", msg);
                     try {
                         sender().tell(save(msg), self());
+                        log.info("Cancel the message is {}", msg);
                     } catch (Exception e) {
                         log.error("Cancel the error is {}", e);
                     }

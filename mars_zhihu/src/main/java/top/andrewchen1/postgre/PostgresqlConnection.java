@@ -1,10 +1,9 @@
 package top.andrewchen1.postgre;
 
+import com.alibaba.druid.pool.DruidDataSource;
 import lombok.extern.java.Log;
-import org.postgresql.Driver;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Objects;
 import java.util.Properties;
@@ -16,35 +15,51 @@ import java.util.logging.Level;
  */
 @Log
 public class PostgresqlConnection {
-    private static PostgresqlConnection postgreConnection;
+    private DruidDataSource druidDataSource;
     private Properties properties;
+    private static PostgresqlConnection postgresqlConnection;
 
     private PostgresqlConnection() {
         try {
             properties = new Properties();
-            properties.load(this.getClass().getClassLoader().getResourceAsStream("jdbc.properties"));
+            properties.load(Objects.requireNonNull(this.getClass().getClassLoader()
+                    .getResourceAsStream("jdbc.properties")));
+
+            druidDataSource = new DruidDataSource();
+            String userName = properties.getProperty("username");
+            String password = properties.getProperty("password");
+            String url = properties.getProperty("jdbcUrl");
+            druidDataSource.setUsername(userName);
+            druidDataSource.setPassword(password);
+            druidDataSource.setUrl(url);
+            druidDataSource.setMaxActive(20);
+            druidDataSource.setDefaultAutoCommit(true);
         } catch(Exception e) {
             log.log(Level.INFO, e.getMessage());
         }
     }
 
-    public static PostgresqlConnection getNewInstance() {
-        if (Objects.isNull(postgreConnection)) {
+    public static PostgresqlConnection getInstance() {
+        if (Objects.isNull(postgresqlConnection)) {
             synchronized (PostgresqlConnection.class) {
-                if (Objects.isNull(postgreConnection)) {
-                    postgreConnection = new PostgresqlConnection();
+                if (Objects.isNull(postgresqlConnection)) {
+                    postgresqlConnection = new PostgresqlConnection();
                 }
             }
         }
-        return postgreConnection;
+        return postgresqlConnection;
     }
 
+    /**
+     * 为什么要使用连接池
+     * 因为要缓慢劣化
+     * 在没有使用连接池的时候
+     * 直接连接数据库 然后就直接too many connection 了
+     * 在使用连接池之后会等待而不是直接爆炸
+     * @return
+     * @throws SQLException
+     */
     public Connection getConnection() throws SQLException {
-        DriverManager.registerDriver(new Driver());
-        String url = properties.getProperty("jdbcUrl");
-        String username = properties.getProperty("username");
-        String password = properties.getProperty("password");
-        return DriverManager.getConnection(url, username, password);
+        return druidDataSource.getConnection();
     }
-
 }
