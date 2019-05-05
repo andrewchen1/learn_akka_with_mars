@@ -5,4 +5,8 @@ package top.andrewchen1.paper9.order;
  * 2019-04-13
  */
 public class Cancel extends TradeOrder {
+
+    public Long getOrderId() {
+        return getId();
+    }
 }

@@ -16,7 +16,7 @@ import java.util.Objects;
  * @author dafuchen
  * 2019-03-30
  */
-public class OrderRepository {
+public class PlaceOrderRepository {
     private static Boolean save(TradeOrder tradeOrder, BigDecimal price) throws Exception {
         Connection connection = PostgresqlConnection.getInstance().getConnection();
         String sql = "insert into order_flow (id, user_id, price, content) values (?, ?, ?, ?)";

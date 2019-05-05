@@ -9,7 +9,7 @@ import akka.japi.pf.ReceiveBuilder;
 import akka.util.Timeout;
 import scala.concurrent.Await;
 import top.andrewchen1.paper4.dto.NextValue;
-import top.andrewchen1.paper9.counter.repository.OrderRepository;
+import top.andrewchen1.paper9.counter.repository.PlaceOrderRepository;
 import top.andrewchen1.paper9.order.*;
 
 import java.time.Duration;
@@ -38,6 +38,7 @@ public class OrderAction extends AbstractActor {
         return ReceiveBuilder.create()
                 .match(LimitAsk.class, msg -> {
                     try {
+                        msg.setCategory(OrderTypeEnum.LIMIT_ASK.toString());
                         sender().tell(save(msg), self());
                         log.info("limitAsk the message is {}", msg);
                     } catch (Exception e) {
@@ -46,6 +47,7 @@ public class OrderAction extends AbstractActor {
                 })
                 .match(LimitBid.class, msg -> {
                     try {
+                        msg.setCategory(OrderTypeEnum.LIMIT_BID.toString());
                         sender().tell(save(msg), self());
                         log.info("limitBid the message is {}", msg);
                     } catch (Exception e) {
@@ -54,6 +56,7 @@ public class OrderAction extends AbstractActor {
                 })
                 .match(MarketAsk.class, msg -> {
                     try {
+                        msg.setCategory(OrderTypeEnum.MARKET_ASK.toString());
                         sender().tell(save(msg), self());
                         log.info("MarketAsk the message is {}", msg);
                     } catch (Exception e) {
@@ -62,28 +65,23 @@ public class OrderAction extends AbstractActor {
                 })
                 .match(MarketBid.class, msg -> {
                     try {
+                        msg.setCategory(OrderTypeEnum.MARKET_BID.toString());
                         sender().tell(save(msg), self());
                         log.info("MarketBid the message is {}", msg);
                     } catch (Exception e) {
                         log.error("MarketBid the error is {}", e);
                     }
                 })
-                .match(MarketCancel.class, msg -> {
+                .match(Cancel.class, msg -> {
                     try {
+                        msg.setCategory(OrderTypeEnum.CANCEL.toString());
                         sender().tell(save(msg), self());
                         log.info("MarketCancel the message is {}", msg);
                     } catch (Exception e) {
                         log.error("MarketCancel the error is {}", e);
                     }
                 })
-                .match(Cancel.class, msg -> {
-                    try {
-                        sender().tell(save(msg), self());
-                        log.info("Cancel the message is {}", msg);
-                    } catch (Exception e) {
-                        log.error("Cancel the error is {}", e);
-                    }
-                }).matchAny(msg -> {
+                .matchAny(msg -> {
                     log.error("send unknown message {}", msg);
                 })
                 .build();
@@ -96,7 +94,7 @@ public class OrderAction extends AbstractActor {
         var future = ask(actorSelection, nextValue, timeout);
         Long sequence = (Long)Await.result(future, timeout.duration());
         order.setId(sequence);
-        OrderRepository.save(order);
+        PlaceOrderRepository.save(order);
         return sequence;
     }
 

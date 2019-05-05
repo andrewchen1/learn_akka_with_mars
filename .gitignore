@@ -7,3 +7,9 @@
 *.iml
 out
 gen
+*/target
+*/.g8
+*/gradle
+*/logs
+*/project
+

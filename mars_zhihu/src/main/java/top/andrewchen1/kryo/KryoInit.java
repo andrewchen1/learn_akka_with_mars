@@ -2,6 +2,8 @@ package top.andrewchen1.kryo;
 
 import com.esotericsoftware.kryo.Kryo;
 
+import java.util.ArrayList;
+
 /**
  * @author dafuchen
  * 2019-03-30
@@ -18,7 +20,7 @@ public class KryoInit {
         kryo.register(top.andrewchen1.paper9.order.LimitBid.class);
         kryo.register(top.andrewchen1.paper9.order.MarketBid.class);
         kryo.register(top.andrewchen1.paper9.order.MarketAsk.class);
-        kryo.register(top.andrewchen1.paper9.order.MarketCancel.class);
         kryo.register(top.andrewchen1.paper9.order.Cancel.class);
+        kryo.register(ArrayList.class);
     }
 }

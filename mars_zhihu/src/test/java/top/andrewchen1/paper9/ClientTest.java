@@ -9,15 +9,12 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import top.andrewchen1.paper4.dto.NextValue;
 import top.andrewchen1.paper9.actor.OrderAction;
 import top.andrewchen1.paper9.order.*;
 
 import java.math.BigDecimal;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
-
-import static akka.pattern.Patterns.ask;
 
 
 /**
